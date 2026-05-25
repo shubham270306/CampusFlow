@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusFlow — Student Productivity Dashboard</title>
+  <meta name="description" content="An elegant, modern centralized workspace for tracking assignments, monitoring attendance, saving notes, and boosting academic productivity.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- FontAwesome Icon Set -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+<body class="scroller">
+
+  <!-- Interactive Zero-Gravity Background Canvas -->
+  <canvas id="canvas-particles" class="canvas-particles"></canvas>
+
+  <!-- Cinematic Splash Screen Intro -->
+  <div id="splash-screen" class="splash-screen" aria-hidden="true">
+    <div class="splash-content">
+      <div class="splash-logo" id="splash-logo">
+        <span class="splash-letter">C</span>
+        <span class="splash-letter">a</span>
+        <span class="splash-letter">m</span>
+        <span class="splash-letter">p</span>
+        <span class="splash-letter">u</span>
+        <span class="splash-letter">s</span>
+        <span class="splash-letter">F</span>
+        <span class="splash-letter">l</span>
+        <span class="splash-letter">o</span>
+        <span class="splash-letter">w</span>
+      </div>
+      <div class="splash-subtitle">Your central academic workspace</div>
+      <div class="splash-loader-track">
+        <div class="splash-loader-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authentication Shell (Auth Gateway) -->
+  <main id="auth-wrapper" class="auth-wrapper"></main>
+
+  <!-- Primary Application Workspace Shell -->
+  <div id="app-container" class="app-container" style="display: none;">
+    
+    <!-- Sidebar Navigation / Mobile Base bar -->
+    <aside class="sidebar">
+      <div class="brand-wrapper">
+        <div class="brand-logo">CF</div>
+        <h1 class="brand-name">CampusFlow</h1>
+      </div>
+
+      <nav class="nav-menu">
+        <li>
+          <button class="nav-item-btn active" data-tab="dashboard" aria-label="Open Dashboard View">
+            <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
+            <span>Dashboard</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-item-btn" data-tab="assignments" aria-label="Open Assignments Tracker View">
+            <i class="fa-solid fa-tasks" aria-hidden="true"></i>
+            <span>Assignments</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-item-btn" data-tab="attendance" aria-label="Open Attendance Monitor View">
+            <i class="fa-solid fa-percentage" aria-hidden="true"></i>
+            <span>Attendance</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-item-btn" data-tab="notes" aria-label="Open Notes & Resources View">
+            <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+            <span>Notes & Links</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-item-btn" data-tab="profile" aria-label="Open User Profile View">
+            <i class="fa-solid fa-user-cog" aria-hidden="true"></i>
+            <span>Profile</span>
+          </button>
+        </li>
+        <li>
+          <button class="nav-item-btn" id="theme-toggle-btn" aria-label="Toggle visual theme mode">
+            <i class="fa-solid fa-moon" id="theme-toggle-icon" aria-hidden="true"></i>
+            <span id="theme-toggle-text">Dark Mode</span>
+          </button>
+        </li>
+      </nav>
+
+      <!-- Current Session Info Badge -->
+      <div class="user-profile-badge">
+        <div class="user-avatar" id="nav-user-avatar">CF</div>
+        <div class="user-info">
+          <div class="user-name" id="nav-user-name">Loading Profile...</div>
+          <div class="user-role">Student Account</div>
+        </div>
+        <button class="logout-btn" id="logout-trigger" title="Log Out Session" aria-label="Log Out of CampusFlow">
+          <i class="fa-solid fa-sign-out-alt" aria-hidden="true"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Unified Sliding Content Window -->
+    <main class="content-panel scroller" id="content-panel">
+      
+      <!-- 1. DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view-section active">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Welcome back, <span id="dash-greeting-name">Student</span>!</h2>
+            <div class="view-subtitle" id="dash-live-date">Monday, May 25, 2026</div>
+          </div>
+          <div>
+            <button class="action-btn" onclick="document.getElementById('modal-add-assignment').showModal()" aria-label="Create New Assignment">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i> New Assignment
+            </button>
+          </div>
+        </div>
+
+        <!-- Dashboard Stats Strip -->
+        <div class="stats-row">
+          <div class="glass-card stat-card">
+            <div class="stat-icon primary">
+              <i class="fa-solid fa-calendar-day" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-tasks-today">0</div>
+              <div class="stat-label">Tasks Today</div>
+            </div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-icon accent">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-pending-total">0</div>
+              <div class="stat-label">Pending Total</div>
+            </div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-icon success">
+              <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-avg-attendance">0%</div>
+              <div class="stat-label">Avg Attendance</div>
+            </div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-icon danger">
+              <i class="fa-solid fa-sticky-note" aria-hidden="true"></i>
+            </div>
+            <div>
+              <div class="stat-value" id="stat-notes-saved">0</div>
+              <div class="stat-label">Saved Notes</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Main Grid Content -->
+        <div class="dashboard-layout">
+          <!-- Column 1: Today's Tasks & Urgent Deadlines -->
+          <div class="glass-card" style="display: flex; flex-direction: column; gap: 20px;">
+            <h3 class="dashboard-block-title">
+              <i class="fa-solid fa-bell" style="color: var(--color-primary);" aria-hidden="true"></i> Urgent Deadlines & Today's Schedule
+            </h3>
+            
+            <div id="dash-schedule-feed" style="display: flex; flex-direction: column; gap: 16px;">
+              <!-- Dynamic assignments elements due soon -->
+              <div class="empty-state">
+                <i class="fa-solid fa-check-circle" aria-hidden="true"></i>
+                <h3>All Clear!</h3>
+                <p>No upcoming assignments due in the next 3 days. Nice work!</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Critical Alerts Feed -->
+          <div class="glass-card" style="display: flex; flex-direction: column; gap: 20px;">
+            <h3 class="dashboard-block-title">
+              <i class="fa-solid fa-triangle-exclamation" style="color: var(--color-danger);" aria-hidden="true"></i> Low Attendance Alerts
+            </h3>
+            
+            <div class="alert-feed" id="dash-alerts-feed">
+              <!-- Dynamic list of subject-level alerts (below 75%) -->
+              <div class="empty-state">
+                <i class="fa-solid fa-circle-check" style="color: var(--color-success);" aria-hidden="true"></i>
+                <h3>Attendance Optimal</h3>
+                <p>All classes are registered at or above the 75% target attendance threshold.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. ASSIGNMENTS VIEW -->
+      <section id="view-assignments" class="view-section">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Assignment Tracker</h2>
+            <div class="view-subtitle">Organize, schedule, and execute your course work.</div>
+          </div>
+          <div>
+            <button class="action-btn" onclick="document.getElementById('modal-add-assignment').showModal()" aria-label="Launch Create Assignment Modal">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i> Add Assignment
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Row -->
+        <div class="tracker-filters">
+          <button class="filter-btn active" data-filter="all">All Assignments</button>
+          <button class="filter-btn" data-filter="pending">Pending</button>
+          <button class="filter-btn" data-filter="completed">Completed</button>
+          <button class="filter-btn" data-filter="high">High Priority</button>
+        </div>
+
+        <!-- Assignments Grid -->
+        <div class="card-grid" id="assignments-card-grid">
+          <!-- Dynamic cards populated by assignments.js -->
+        </div>
+      </section>
+
+      <!-- 3. ATTENDANCE VIEW -->
+      <section id="view-attendance" class="view-section">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Attendance Tracker</h2>
+            <div class="view-subtitle">Monitor class presence and safeguard your minimum 75% attendance targets.</div>
+          </div>
+          <div>
+            <button class="action-btn" onclick="document.getElementById('modal-add-subject').showModal()" aria-label="Launch Create Subject Modal">
+              <i class="fa-solid fa-folder-plus" aria-hidden="true"></i> Add Subject
+            </button>
+          </div>
+        </div>
+
+        <!-- Attendance Cards Grid -->
+        <div class="card-grid" id="attendance-card-grid">
+          <!-- Dynamic circular course stat cards populated by attendance.js -->
+        </div>
+      </section>
+
+      <!-- 4. NOTES & RESOURCES VIEW -->
+      <section id="view-notes" class="view-section">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Notes & Resources</h2>
+            <div class="view-subtitle">Store notes, categorize them by course, and associate research web hyperlinks.</div>
+          </div>
+          <div>
+            <button class="action-btn" onclick="document.getElementById('modal-add-note').showModal()" aria-label="Launch Create Note Modal">
+              <i class="fa-solid fa-pen-fancy" aria-hidden="true"></i> Add Note
+            </button>
+          </div>
+        </div>
+
+        <!-- Notes Tab Layout -->
+        <div class="notes-container">
+          <!-- Category Sidebar Column -->
+          <div class="glass-card notes-categories-box">
+            <h4 style="font-size: 14px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; font-weight: 700;">Filter by Course</h4>
+            <div id="notes-category-list">
+              <!-- Dynamically rendered button lists -->
+            </div>
+          </div>
+
+          <!-- Notes Canvas -->
+          <div>
+            <div class="notes-search-row">
+              <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="text" id="notes-search-query" class="search-input" placeholder="Search saved notes title or body content...">
+              </div>
+            </div>
+
+            <!-- Notes List Grid -->
+            <div class="card-grid" id="notes-card-grid">
+              <!-- Dynamically populated by notes.js -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. PROFILE & SETTINGS VIEW -->
+      <section id="view-profile" class="view-section">
+        <div class="view-header">
+          <div>
+            <h2 class="view-title">Student Profile</h2>
+            <div class="view-subtitle">Manage session configurations, settings, and view user statistics.</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 32px; align-items: flex-start;" id="profile-layout-container">
+          <!-- Left Column: User details glass card -->
+          <div class="glass-card profile-card">
+            <div class="profile-avatar-large" id="profile-avatar-char">S</div>
+            <h3 class="profile-name" id="profile-full-name">Shubham Ghodasara</h3>
+            <p class="profile-email" id="profile-email-addr">shubham@example.com</p>
+            
+            <div class="profile-meta-grid">
+              <div class="profile-meta-item">
+                <div class="profile-meta-val" id="profile-stat-completed">0</div>
+                <div class="profile-meta-lbl">Tasks Completed</div>
+              </div>
+              <div class="profile-meta-item">
+                <div class="profile-meta-val" id="profile-stat-attendance">0%</div>
+                <div class="profile-meta-lbl">Overall Attendance</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Settings and stats detail -->
+          <div class="glass-card" style="display: flex; flex-direction: column; gap: 24px;">
+            <h3 style="font-size: 20px; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 12px;">
+              Dashboard Control Panel
+            </h3>
+            
+            <div class="dialog-form">
+              <div>
+                <label style="margin-bottom: 10px;">Subject Subject Directory</label>
+                <div style="display: flex; flex-direction: column; gap: 10px;" id="profile-subject-list">
+                  <!-- Dynamic lists of subject blocks with a remove icon -->
+                </div>
+              </div>
+              
+              <div style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 24px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <h4 style="font-size: 15px; font-weight: 600; color: var(--color-danger);">System Reset</h4>
+                  <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Purge all local tasks, attendance sheets, and resources from this device.</p>
+                </div>
+                <button class="btn-secondary" id="btn-purge-local" style="border-color: rgba(244,63,94,0.3); color: var(--color-danger);" aria-label="Purge Local Database">
+                  Reset Data
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- NATIVE MODAL OVERLAYS (Light-dismiss implemented) -->
+
+  <!-- Modal A: Add Assignment -->
+  <dialog id="modal-add-assignment" closedby="any" aria-labelledby="title-modal-assignment">
+    <div class="dialog-header">
+      <h3 class="dialog-title" id="title-modal-assignment">Create New Assignment</h3>
+      <button class="dialog-close" onclick="document.getElementById('modal-add-assignment').close()" aria-label="Close dialog">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+    
+    <form class="dialog-form" id="form-add-assignment">
+      <div>
+        <label for="assign-title">Assignment Title</label>
+        <input type="text" id="assign-title" placeholder="e.g. Write Analysis Report" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label for="assign-subject">Select Subject</label>
+          <select id="assign-subject" required>
+            <!-- Dynamic options -->
+          </select>
+        </div>
+        <div>
+          <label for="assign-priority">Priority Level</label>
+          <select id="assign-priority" required>
+            <option value="low">Low Priority</option>
+            <option value="medium" selected>Medium Priority</option>
+            <option value="high">High Priority</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label for="assign-deadline">Submission Deadline</label>
+        <input type="datetime-local" id="assign-deadline" required>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('modal-add-assignment').close()">Cancel</button>
+        <button type="submit" class="action-btn">Create Task</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal B: Add Subject -->
+  <dialog id="modal-add-subject" closedby="any" aria-labelledby="title-modal-subject">
+    <div class="dialog-header">
+      <h3 class="dialog-title" id="title-modal-subject">Add Subject</h3>
+      <button class="dialog-close" onclick="document.getElementById('modal-add-subject').close()" aria-label="Close dialog">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+    
+    <form class="dialog-form" id="form-add-subject">
+      <div>
+        <label for="subject-name">Subject Name</label>
+        <input type="text" id="subject-name" placeholder="e.g. Distributed Databases" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <label for="subject-attended">Attended Classes</label>
+          <input type="number" id="subject-attended" min="0" value="0" required>
+        </div>
+        <div>
+          <label for="subject-total">Total Conducted Classes</label>
+          <input type="number" id="subject-total" min="0" value="0" required>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('modal-add-subject').close()">Cancel</button>
+        <button type="submit" class="action-btn">Register Course</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal C: Add Note -->
+  <dialog id="modal-add-note" closedby="any" aria-labelledby="title-modal-note">
+    <div class="dialog-header">
+      <h3 class="dialog-title" id="title-modal-note">Write Resource Note</h3>
+      <button class="dialog-close" onclick="document.getElementById('modal-add-note').close()" aria-label="Close dialog">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+      </button>
+    </div>
+    
+    <form class="dialog-form" id="form-add-note">
+      <div>
+        <label for="note-title">Note Title</label>
+        <input type="text" id="note-title" placeholder="e.g. Heap Sort Algorithm steps" required>
+      </div>
+
+      <div>
+        <label for="note-subject">Associate Subject</label>
+        <select id="note-subject" required>
+          <!-- Dynamic options -->
+        </select>
+      </div>
+
+      <div>
+        <label for="note-content">Note Content Body</label>
+        <textarea id="note-content" rows="6" placeholder="Type structural summaries, references, or review lists here..." required></textarea>
+      </div>
+
+      <div>
+        <label>Hyperlink References (Optional)</label>
+        <div class="resource-inputs-group">
+          <div class="resource-inputs-row">
+            <div>
+              <label for="note-link-name" style="font-size: 10px; margin-bottom: 4px;">Link Label</label>
+              <input type="text" id="note-link-name" placeholder="e.g. Documentation">
+            </div>
+            <div>
+              <label for="note-link-url" style="font-size: 10px; margin-bottom: 4px;">URL Address</label>
+              <input type="text" id="note-link-url" placeholder="https://...">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn-secondary" onclick="document.getElementById('modal-add-note').close()">Cancel</button>
+        <button type="submit" class="action-btn">Save Note</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Application Execution Core Boot Module -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
