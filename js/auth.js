@@ -14,8 +14,36 @@ export class AuthController {
 
   // Intercept boot and check session status
   init() {
+    this.ensureDefaultUserSeeded();
     const user = Store.getCurrentUser();
     this.handleSessionUpdate(user);
+  }
+
+  ensureDefaultUserSeeded() {
+    try {
+      const storedUsers = localStorage.getItem("campusflow_users");
+      let users = [];
+      if (storedUsers) {
+        const parsed = JSON.parse(storedUsers);
+        if (Array.isArray(parsed)) {
+          users = parsed;
+        }
+      }
+      if (users.length === 0) {
+        users = [
+          {
+            username: "shubham",
+            fullName: "Shubham Ghodasara",
+            email: "shubham@college.edu",
+            password: "password",
+            createdAt: new Date().toISOString()
+          }
+        ];
+        localStorage.setItem("campusflow_users", JSON.stringify(users));
+      }
+    } catch (e) {
+      console.error("Failed to seed default user", e);
+    }
   }
 
   handleSessionUpdate(user) {
@@ -81,6 +109,10 @@ export class AuthController {
         <div class="auth-input-wrapper">
           <input type="password" id="login-password" class="auth-input" placeholder="••••••••" required autocomplete="current-password">
         </div>
+      </div>
+      <div class="auth-demo-hint" style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 12px; background: rgba(99, 102, 241, 0.05); padding: 8px; border-radius: var(--radius-sm); border: 1px dashed rgba(99, 102, 241, 0.2);">
+        <i class="fa-solid fa-circle-info" style="color: var(--color-primary); margin-right: 4px;"></i>
+        Demo Login: <strong style="color: var(--text-primary)">shubham</strong> / <strong style="color: var(--text-primary)">password</strong>
       </div>
     `;
   }
@@ -150,10 +182,31 @@ export class AuthController {
     try {
       const storedUsers = localStorage.getItem("campusflow_users");
       if (storedUsers) {
-        users = JSON.parse(storedUsers);
+        const parsed = JSON.parse(storedUsers);
+        if (Array.isArray(parsed)) {
+          users = parsed;
+        }
       }
     } catch (e) {
       console.error("Failed to load users database", e);
+    }
+
+    // Pre-seed default user if database is empty
+    if (users.length === 0) {
+      users = [
+        {
+          username: "shubham",
+          fullName: "Shubham Ghodasara",
+          email: "shubham@college.edu",
+          password: "password",
+          createdAt: new Date().toISOString()
+        }
+      ];
+      try {
+        localStorage.setItem("campusflow_users", JSON.stringify(users));
+      } catch (e) {
+        console.error("Failed to seed default user", e);
+      }
     }
 
     if (this.currentTab === 'login') {

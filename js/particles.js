@@ -8,7 +8,7 @@ export class ParticleEngine {
 
     this.ctx = this.canvas.getContext('2d');
     this.particles = [];
-    
+
     // Mouse interaction states
     this.mouse = {
       x: null,
@@ -112,7 +112,7 @@ export class ParticleEngine {
           // Calculate push vector
           const force = (this.mouse.radius - dist) / this.mouse.radius;
           const angle = Math.atan2(dy, dx);
-          
+
           // Gently accelerate away from cursor
           p.x += Math.cos(angle) * force * 1.5;
           p.y += Math.sin(angle) * force * 1.5;
@@ -135,19 +135,19 @@ export class ParticleEngine {
         if (dist < this.connectionDistance) {
           // Fade connection opacity based on distance
           const opacity = (this.connectionDistance - dist) / this.connectionDistance * 0.15;
-          
+
           // Draw connecting webs
           this.ctx.beginPath();
           this.ctx.moveTo(p.x, p.y);
           this.ctx.lineTo(p2.x, p2.y);
-          
+
           // Color based on active visual modes
           if (this.theme === 'dark') {
             this.ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`; // Violet connection in dark mode
           } else {
             this.ctx.strokeStyle = `rgba(99, 102, 241, ${opacity})`; // Indigo connection in light mode
           }
-          
+
           this.ctx.lineWidth = 0.5;
           this.ctx.stroke();
         }
